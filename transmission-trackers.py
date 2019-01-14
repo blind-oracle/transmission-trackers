@@ -84,7 +84,7 @@ for t in torrents:
   diff = trackers - ttrk
 
   if diff:
-    if not silent: print('{}: Adding {} trackers (before: {})'.format(t.name, len(diff)), len(ttrk))
+    if not silent: print('{}: Adding {} trackers (before: {})'.format(t.name, len(diff), len(ttrk)))
     tc.change_torrent(t.id, trackerAdd=list(diff))
   else:
     if debug: print('{}: update not needed'.format(t.name))
