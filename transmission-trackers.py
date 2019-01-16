@@ -38,16 +38,17 @@ silent = False
 # Debug output
 debug = False
 
-###
+### Configuration ends here ###
+hdrs = {'User-Agent': 'Mozilla/5.0'}
 hosts, ips = set(()), set(())
 
 import transmissionrpc, sys, os, time, socket
 
 if sys.version_info[0] == 2:
-  from urllib import urlopen
+  from urllib import Request, urlopen
   from urlparse import urlparse
 else:
-  from urllib.request import urlopen
+  from urllib.request import Request, urlopen
   from urllib.parse import urlparse
 
 def lg(msg):
@@ -75,16 +76,19 @@ def validateTrackerURL(url, dns=True):
     dbg("Host '{}' is duplicate".format(h))
     return False
 
+  ipa = set(())
   if dns:
     try:
-      ip = socket.gethostbyname(h)
+      for r in socket.getaddrinfo(h, None):
+        ipa.add(r[4][0])
     except:
       lg("Host '{}' is not resolvable".format(h))
       return False
 
-    if ip in ips:
-      dbg("Host's '{}' IP '{}' is duplicate".format(h, ip))
-      return False
+    for ip in ipa:
+      if ip in ips:
+        dbg("Host's '{}' IP '{}' is duplicate".format(h, ip))
+        return False
 
     ips.add(ip)
 
@@ -99,7 +103,8 @@ def loadFile(file):
   return l
 
 def loadURL(url):
-  f = urlopen(url)
+  req = Request(url, headers=hdrs)
+  f = urlopen(req)
   l = parse(f.read().decode("utf-8"))
   f.close()
   return l
