@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import transmissionrpc, sys, os, time
-
 # Host, port, username and password to connect to Transmission
 # Set user and pw to None if auth is not required
 host, port, user, pw = 'localhost', 9091, 'admin', 'pwd'
@@ -14,9 +12,26 @@ status_filter = ()
 # How frequently to update trackers cache
 update_freq = 86400
 
-# Path to trackers URL and local cache
-trackers_url = 'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt'
-trackers_file = '/tmp/trackers_all.txt'
+# A list of URLs where to get the tracker lists from.
+# The lists are combined into one with duplicates removed.
+# The trackers from these lists are checked by looking up the URL's hostname in DNS.
+urls = [
+  'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt',
+  # 'http://some.other.tracker.list/trackers.txt'
+  # ...
+]
+
+# Where to cache downloaded lists
+cache_file = '/tmp/trackers_cache.txt'
+
+# Additional local lists of trackers to load.
+# Better to use absolute paths.
+# These are not checked against DNS
+local_lists = [
+  # '/var/cache/trackers1.txt'
+  # '/var/cache/trackers2.txt'
+  # ...
+]
 
 # Don't print anything (unless an error occures)
 silent = False
@@ -24,53 +39,135 @@ silent = False
 debug = False
 
 ###
-if silent: debug = False
-trackers = None
+hosts, ips = set(()), set(())
 
-def readTrackers():
-  f = open(trackers_file, 'r')
-  trackers = set(())
+import transmissionrpc, sys, os, time, socket
 
-  for t in f.readlines():
+if sys.version_info[0] == 2:
+  from urllib import urlopen
+  from urlparse import urlparse
+else:
+  from urllib.request import urlopen
+  from urllib.parse import urlparse
+
+def lg(msg):
+  if not silent: print(msg)
+
+def dbg(msg):
+  if debug: lg(msg)
+
+def parse(txt):
+  l = []
+  for t in txt.split('\n'):
     t = t.strip()
-    if not t.startswith('http') or not t.startswith('udp'):
-      continue
-    trackers.add(t)
+    if t.startswith('http') or t.startswith('udp'):
+      l.append(t)
+  return l
 
+def validateTrackerURL(url, dns=True):
+  try:
+    h = urlparse(url).netloc.split(':', 1)[0]
+  except:
+    lg("Tracker URL '{}' is malformed".format(url))
+    return False
+
+  if h in hosts:
+    dbg("Host '{}' is duplicate".format(h))
+    return False
+
+  if dns:
+    try:
+      ip = socket.gethostbyname(h)
+    except:
+      lg("Host '{}' is not resolvable".format(h))
+      return False
+
+    if ip in ips:
+      dbg("Host's '{}' IP '{}' is duplicate".format(h, ip))
+      return False
+
+    ips.add(ip)
+
+  dbg("Approving tracker '{}'".format(url))
+  hosts.add(h)
+  return True
+
+def loadFile(file):
+  f = open(file, 'r')
+  l = parse(f.read())
   f.close()
-  if debug: print('{} trackers loaded from {}'.format(len(trackers), trackers_file))
-  return trackers
+  return l
 
-def downloadTrackers():
+def loadURL(url):
+  f = urlopen(url)
+  l = parse(f.read().decode("utf-8"))
+  f.close()
+  return l
+
+def downloadLists():
   update = False
 
   try:
-    mt = os.stat(trackers_file).st_mtime
+    mt = os.stat(cache_file).st_mtime
     if time.time() - mt > update_freq:
       update = True
   except:
     update = True
 
   if not update:
-    return
+    return None
 
-  if sys.version_info[0] == 2:
-    import urllib
-    urllib.urlretrieve(trackers_url, trackers_file)
-  else:
-    import urllib.request
-    urllib.request.urlretrieve(trackers_url, trackers_file)
+  trk = []
+  for url in urls:
+    l = loadURL(url)
+    trk += l
+    dbg("Remote URL '{}' loaded: {} trackers".format(url, len(l)))
 
-  trackers = readTrackers()
-  if not silent: print('Trackers list updated ({} loaded)'.format(len(trackers)))
+  valid = []
+  for t in trk:
+    if validateTrackerURL(t): valid.append(t)
 
-downloadTrackers()
-if not trackers: trackers = readTrackers()
+  f = open(cache_file, "w+")
+  f.write('\n'.join(valid))
+  f.close()
+
+  return valid
+
+def readLocalLists():
+  trk = []
+  for f in local_lists:
+    l = loadFile(f)
+    trk += l
+    dbg("Local list '{}' loaded: {} trackers".format(f, len(l)))
+
+  valid = []
+  for t in trk:
+    if validateTrackerURL(t, dns=False): valid.append(t)
+
+  return valid
+
+trk_remote = downloadLists()
+if trk_remote:
+  lg('Remote URLs downloaded: {} trackers'.format(len(trk_remote)))
+elif trk_remote is None:
+  trk_remote = []
+  local_lists.append(cache_file)
+
+trk_local = readLocalLists()
+if trk_local:
+  dbg('Local lists loaded: {} trackers'.format(len(trk_local)))
+
+trackers = set(trk_remote + trk_local)
+dbg('Total trackers: {}'.format(len(trackers)))
+
+if not trackers:
+  lg("No trackers loaded, nothing to do")
+  exit(1)
 
 tc = transmissionrpc.Client(host, port=port, user=user, password=pw)
 torrents = tc.get_torrents()
 
-if debug: print('{} torrents total'.format(len(torrents)))
+dbg('{} torrents total'.format(len(torrents)))
 
 for t in torrents:
   if status_filter and not t.status in status_filter:
