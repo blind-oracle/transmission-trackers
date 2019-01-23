@@ -21,6 +21,9 @@ urls = [
   # ...
 ]
 
+# Whether to print an error if connection failed (no Transmission running?)
+err_on_connect = False
+
 # Where to cache downloaded lists
 cache_file = '/tmp/trackers_cache.txt'
 
@@ -169,14 +172,22 @@ if not trackers:
   lg("No trackers loaded, nothing to do")
   exit(1)
 
-tc = transmissionrpc.Client(host, port=port, user=user, password=pw)
+try:
+  tc = transmissionrpc.Client(host, port=port, user=user, password=pw)
+except:
+  if not err_on_connect:
+    exit()
+
+  print("Unable to connect to Transmission: ", sys.exc_info()[0])
+  raise
+
 torrents = tc.get_torrents()
 
 dbg('{} torrents total'.format(len(torrents)))
 
 for t in torrents:
   if status_filter and not t.status in status_filter:
-    if debug: print('{}: skipping due to status filter'.format(t.name))
+    dbg('{}: skipping due to status filter'.format(t.name))
     continue
 
   ttrk = set(())
@@ -186,7 +197,7 @@ for t in torrents:
   diff = trackers - ttrk
 
   if diff:
-    if not silent: print('{}: Adding {} trackers (before: {})'.format(t.name, len(diff), len(ttrk)))
+    lg('{}: Adding {} trackers (before: {})'.format(t.name, len(diff), len(ttrk)))
     tc.change_torrent(t.id, trackerAdd=list(diff))
   else:
-    if debug: print('{}: update not needed'.format(t.name))
+    dbg('{}: update not needed'.format(t.name))
