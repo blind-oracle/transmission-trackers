@@ -70,7 +70,7 @@ def parse(txt):
 
 def validateTrackerURL(url, dns=True):
   try:
-    h = urlparse(url).netloc.split(':', 1)[0]
+    h = ':'.join(urlparse(url).netloc.split(':')[0:-1])
   except:
     lg("Tracker URL '{}' is malformed".format(url))
     return False
