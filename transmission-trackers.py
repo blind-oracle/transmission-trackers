@@ -2,7 +2,7 @@
 
 # Host, port, username and password to connect to Transmission
 # Set user and pw to None if auth is not required
-host, port, user, pw = 'localhost', 9091, 'admin', 'pwd'
+host, port, user, pw = 'localhost', 9091, 'admin', 'passwd'
 
 # Work with torrents having only these statuses.
 # Can be any combination of: 'check pending', 'checking', 'downloading', 'seeding', 'stopped'
