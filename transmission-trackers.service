@@ -1,0 +1,14 @@
+[Unit]
+Description=add tracker to torent
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+User=zcq100
+Type=oneshot
+WorkingDirectory=/docker/transmission/transmission-trackers
+ExecStart=python3 transmission-trackers.py
+
+
+[Install]
+WantedBy=multi-user.target
