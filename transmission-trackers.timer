@@ -1,0 +1,10 @@
+[Unit]
+Description=add trackers to torrent every 10 minutes
+
+[Timer]
+OnBootSec=0s
+OnUnitActiveSec=10min
+Unit=transmission-trackers.service
+
+[Install]
+WantedBy=multi-user.target

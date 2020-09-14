@@ -2,7 +2,7 @@
 
 # Host, port, username and password to connect to Transmission
 # Set user and pw to None if auth is not required
-host, port, user, pw = 'localhost', 9091, 'admin', 'pwd'
+host, port, user, pw = 'localhost', 9091, 'admin', 'passwd'
 
 # Work with torrents having only these statuses.
 # Can be any combination of: 'check pending', 'checking', 'downloading', 'seeding', 'stopped'
@@ -17,7 +17,7 @@ update_freq = 86400
 # The trackers from these lists are checked by looking up the URL's hostname in DNS.
 urls = [
   'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt',
-  # 'http://some.other.tracker.list/trackers.txt'
+  'https://raw.githubusercontent.com/zcq100/transmission-trackers/master/tracker_ipv6.txt',
   # ...
 ]
 
