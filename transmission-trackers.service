@@ -6,6 +6,7 @@ Wants=network-online.target
 [Service]
 User=zcq100
 Type=oneshot
+#Your WorkingDirectory
 WorkingDirectory=/docker/transmission/transmission-trackers
 ExecStart=python3 transmission-trackers.py
 
