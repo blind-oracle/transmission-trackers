@@ -17,7 +17,7 @@ update_freq = 86400
 # The trackers from these lists are checked by looking up the URL's hostname in DNS.
 urls = [
   'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt',
-  # 'http://some.other.tracker.list/trackers.txt'
+  'https://raw.githubusercontent.com/zcq100/transmission-trackers/master/tracker_ipv6.txt',
   # ...
 ]
 
