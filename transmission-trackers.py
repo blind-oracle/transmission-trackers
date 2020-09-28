@@ -45,7 +45,15 @@ debug = False
 hdrs = {'User-Agent': 'Mozilla/5.0'}
 hosts, ips = set(()), set(())
 
-import transmissionrpc, sys, os, time, socket
+import sys, os, time, socket
+try:
+  from transmissionrpc import Client
+except ImportError:
+  try
+    from transmission_rpc import Client
+  except ImportError:
+    print("neither transmissionrpc nor transmission-rpc is installed")
+    exit()
 
 if sys.version_info[0] == 2:
   from urllib import Request, urlopen
@@ -173,7 +181,10 @@ if not trackers:
   exit(1)
 
 try:
-  tc = transmissionrpc.Client(host, port=port, user=user, password=pw)
+  if Client.__module__ == 'transmission_rpc.client':
+    tc = Client(host=host, port=port, username=user, password=pw)
+  else:
+    tc = Client(host, port=port, user=user, password=pw)
 except:
   if not err_on_connect:
     exit()
