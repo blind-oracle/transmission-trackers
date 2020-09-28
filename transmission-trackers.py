@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import print_function
 
 # Host, port, username and password to connect to Transmission
 # Set user and pw to None if auth is not required
@@ -56,7 +57,7 @@ except ImportError:
     exit()
 
 if sys.version_info[0] == 2:
-  from urllib import Request, urlopen
+  from urllib2 import Request, urlopen
   from urlparse import urlparse
 else:
   from urllib.request import Request, urlopen
