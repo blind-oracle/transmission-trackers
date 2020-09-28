@@ -1,1 +1,3 @@
-transmissionrpc>=0.11
+transmission-rpc>=3.2; python_version >= '3'
+transmissionrpc>=0.11; python_version < '3'
+toml
