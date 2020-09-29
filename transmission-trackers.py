@@ -50,7 +50,7 @@ import sys, os, time, socket
 try:
   from transmissionrpc import Client
 except ImportError:
-  try
+  try:
     from transmission_rpc import Client
   except ImportError:
     print("neither transmissionrpc nor transmission-rpc is installed")
