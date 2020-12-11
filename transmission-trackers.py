@@ -4,7 +4,7 @@ from __future__ import print_function
 # Host, port, username and password to connect to Transmission
 # Set user and pw to None if auth is not required
 client = {
-  'host': 'localhost',
+  'address': 'localhost',
   'port': 9091,
   'user': 'admin',
   'password': 'passwd'
