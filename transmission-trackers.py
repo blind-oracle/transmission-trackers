@@ -4,7 +4,7 @@ from __future__ import print_function
 # Host, port, username and password to connect to Transmission
 # Set user and pw to None if auth is not required
 client = {
-  'address': 'localhost',
+  'host': 'localhost',
   'port': 9091,
   'user': 'admin',
   'password': 'passwd'
@@ -80,6 +80,9 @@ hosts, ips = set(()), set(())
 import sys, os, time, socket
 try:
   from transmissionrpc import Client
+  if 'host' in client:
+    client['address'] = client['host']
+    del client['host']
 except ImportError:
   try:
     from transmission_rpc import Client
