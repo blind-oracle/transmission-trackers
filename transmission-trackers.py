@@ -235,6 +235,9 @@ for t in torrents:
   if config['status_filter'] and not t.status in config['status_filter']:
     dbg('{}: skipping due to status filter'.format(t.name))
     continue
+  if t.isPrivate:
+    dbg('{}: skipping private torrent'.format(t.name))
+    continue
 
   ttrk = set(())
   for trk in t.trackers:
