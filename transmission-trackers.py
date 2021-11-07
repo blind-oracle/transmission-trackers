@@ -53,7 +53,7 @@ if getcwd() != '/docker/transmission/transmission-trackers':
   try:
     import toml
     configfile = path.join( \
-      env.get('XDG_CONFIG_HOME', path.join(env['HOME'],'.config')),
+      env.get('XDG_CONFIG_HOME', path.join(env.get('HOME',env.get('USERPROFILE',env.get('HOMEPATH',None))),'.config')),
       'transmission/trackers.toml'
     )
     if path.exists(configfile):
@@ -64,10 +64,9 @@ if getcwd() != '/docker/transmission/transmission-trackers':
         mkdir(path.dirname(configfile))
       with open(configfile, 'w') as f:
         toml.dump( {'client': client, 'config': config }, f )
-  except:
-    pass
+  except KeyError:
   # Where to cache downloaded lists
-  cache_file = path.join(env['HOME'] ,'.cache/trackers.txt')
+    cache_file = path.join(env['TEMP'] ,'.cache/trackers.txt')    
 else:
   cache_file = '/tmp/trackers_cache.txt'
 
