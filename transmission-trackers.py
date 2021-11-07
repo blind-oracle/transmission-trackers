@@ -52,6 +52,8 @@ if getcwd() != '/docker/transmission/transmission-trackers':
   from os import environ as env, path, mkdir
   try:
     cache_file = path.join(env.get('TEMP',env.get('TMP',None)) ,'.cache/trackers.txt')
+    if not path.isdir(path.dirname(cache_file)):
+        mkdir(path.dirname(cache_file))
     import toml
     configfile = path.join( \
       env.get('XDG_CONFIG_HOME', path.join(env.get('HOME',env.get('USERPROFILE',env.get('HOMEPATH',None))),'.config')),
