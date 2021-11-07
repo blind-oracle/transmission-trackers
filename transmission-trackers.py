@@ -46,7 +46,7 @@ config = {
   # Debug output
   'debug': False
 }
-
+cache_file=None # Universal scope to be set later
 from os import getcwd
 if getcwd() != '/docker/transmission/transmission-trackers':
   from os import environ as env, path, mkdir
