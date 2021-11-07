@@ -46,11 +46,12 @@ config = {
   # Debug output
   'debug': False
 }
-cache_file = path.join(env.get('TEMP',env.get('TMP',None)) ,'.cache/trackers.txt')  # Universal scope
+cache_file = None  # Universal scope
 from os import getcwd
 if getcwd() != '/docker/transmission/transmission-trackers':
   from os import environ as env, path, mkdir
   try:
+    cache_file = path.join(env.get('TEMP',env.get('TMP',None)) ,'.cache/trackers.txt')
     import toml
     configfile = path.join( \
       env.get('XDG_CONFIG_HOME', path.join(env.get('HOME',env.get('USERPROFILE',env.get('HOMEPATH',None))),'.config')),
