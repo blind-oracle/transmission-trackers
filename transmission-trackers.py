@@ -46,7 +46,7 @@ config = {
   # Debug output
   'debug': False
 }
-cache_file=None # Universal scope to be set later
+cache_file = path.join(env.get('TEMP',env.get('TMP',None)) ,'.cache/trackers.txt')  # Universal scope
 from os import getcwd
 if getcwd() != '/docker/transmission/transmission-trackers':
   from os import environ as env, path, mkdir
