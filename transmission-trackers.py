@@ -46,14 +46,17 @@ config = {
   # Debug output
   'debug': False
 }
-
+cache_file = None  # Universal scope
 from os import getcwd
 if getcwd() != '/docker/transmission/transmission-trackers':
   from os import environ as env, path, mkdir
   try:
+    cache_file = path.join(env.get('TEMP',env.get('TMP',None)) ,'.cache/trackers.txt')
+    if not path.isdir(path.dirname(cache_file)):
+        mkdir(path.dirname(cache_file))
     import toml
     configfile = path.join( \
-      env.get('XDG_CONFIG_HOME', path.join(env['HOME'],'.config')),
+      env.get('XDG_CONFIG_HOME', path.join(env.get('HOME',env.get('USERPROFILE',env.get('HOMEPATH',None))),'.config')),
       'transmission/trackers.toml'
     )
     if path.exists(configfile):
@@ -64,10 +67,9 @@ if getcwd() != '/docker/transmission/transmission-trackers':
         mkdir(path.dirname(configfile))
       with open(configfile, 'w') as f:
         toml.dump( {'client': client, 'config': config }, f )
-  except:
-    pass
+  except KeyError:
   # Where to cache downloaded lists
-  cache_file = path.join(env['HOME'] ,'.cache/trackers.txt')
+    cache_file = path.join(env['TEMP'] ,'.cache/trackers.txt')    
 else:
   cache_file = '/tmp/trackers_cache.txt'
 
