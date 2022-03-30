@@ -51,7 +51,7 @@ from os import getcwd
 if getcwd() != '/docker/transmission/transmission-trackers':
   from os import environ as env, path, mkdir
   try:
-    cache_file = path.join(env.get('TEMP',env.get('TMP',None)) ,'.cache/trackers.txt')
+    cache_file = path.join(env.get('TEMP',env.get('TMP','')) ,'.cache/trackers.txt')
     if not path.isdir(path.dirname(cache_file)):
         mkdir(path.dirname(cache_file))
     import toml
