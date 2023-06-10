@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 from __future__ import print_function
+import socket
+import time
+import os
+import sys
+from os import getcwd
 
 # Host, port, username and password to connect to Transmission
 # Set user and pw to None if auth is not required
@@ -46,8 +51,8 @@ config = {
   # Debug output
   'debug': False
 }
+
 cache_file = None  # Universal scope
-from os import getcwd
 if getcwd() != '/docker/transmission/transmission-trackers':
   from os import environ as env, path, mkdir
   try:
@@ -69,17 +74,15 @@ if getcwd() != '/docker/transmission/transmission-trackers':
         toml.dump( {'client': client, 'config': config }, f )
   except KeyError:
   # Where to cache downloaded lists
-    cache_file = path.join(env['TEMP'] ,'.cache/trackers.txt')    
+    cache_file = path.join(env['TEMP'] ,'.cache/trackers.txt')
 else:
   cache_file = '/tmp/trackers_cache.txt'
-
 
 
 ### Configuration ends here ###
 hdrs = {'User-Agent': 'Mozilla/5.0'}
 hosts, ips = set(()), set(())
 
-import sys, os, time, socket
 try:
   from transmissionrpc import Client
   if 'host' in client:
@@ -237,13 +240,13 @@ for t in torrents:
   if config['status_filter'] and not t.status in config['status_filter']:
     dbg('{}: skipping due to status filter'.format(t.name))
     continue
-  if t.isPrivate:
+  if getattr(t, 'isPrivate', getattr(t, 'is_private', False)):
     dbg('{}: skipping private torrent'.format(t.name))
     continue
 
   ttrk = set(())
   for trk in t.trackers:
-    ttrk.add(trk['announce'])
+    ttrk.add(getattr(trk, 'fields', trk).get('announce'))
 
   diff = trackers - ttrk
 
