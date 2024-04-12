@@ -28,3 +28,8 @@ Usage:
 * Adjust other parameters if needed (see comments)
 * Make the script run by cron e.g. every minute
 * You're done
+
+Cron Setup:
+* Open Crontab using crontab -e
+* For Updating Trackers to Every New Torrent Every 15 Minutes Add: */15 * * * * /usr/bin/sh [path]]/transmission-trackers-auto-cron.sh
+* Modify the transmission-trackers-auto.sh file as per your needs. We have provided two options, transmission-daemon & docker
