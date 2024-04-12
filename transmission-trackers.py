@@ -253,5 +253,7 @@ for t in torrents:
   if diff:
     lg('{}: Adding {} trackers (before: {})'.format(t.name, len(diff), len(ttrk)))
     tc.change_torrent(t.id, trackerAdd=list(diff))
+    time.sleep(1)
+    tc.reannounce_torrent(t.id)
   else:
     dbg('{}: update not needed'.format(t.name))
