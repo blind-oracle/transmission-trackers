@@ -21,6 +21,13 @@ config = {
   # If empty - will affect all torrents
   'status_filter': (),
 
+  # Ignore torrents that contain any of these trackers.
+  # This is useful, e.g., for excluding torrents from private trackers.
+  # trackers are matched by substring, so you can cover https://my.site/annouce with just my.site
+  'tracker_filter': [
+    'plab.site'
+  ],
+
   # A list of URLs where to get the tracker lists from.
   # The lists are combined into one with duplicates removed.
   # The trackers from these lists are checked by looking up the URL's hostname in DNS.
@@ -247,6 +254,10 @@ for t in torrents:
   ttrk = set(())
   for trk in t.trackers:
     ttrk.add(getattr(trk, 'fields', trk).get('announce'))
+
+  if any(tracker in url for url in ttrk for tracker in config['tracker_filter']):
+    dbg('{}: skipping due to tracker filter'.format(t.name))
+    continue
 
   diff = trackers - ttrk
 
