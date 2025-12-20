@@ -54,7 +54,7 @@ config = {
   'silent': False,
 
   # Debug output
-  'debug': False
+  'debug': True
 }
 
 cache_file = None  # Universal scope
@@ -253,7 +253,8 @@ for t in torrents:
   for trk in t.trackers:
     ttrk.add(getattr(trk, 'fields', trk).get('announce'))
 
-  if any(tracker in url for url in ttrk for tracker in config['tracker_filter']):
+  # Use .get() to avoid error if key doesn't exist
+  if any(tracker in url for url in ttrk for tracker in config.get('tracker_filter', [])):
     dbg('{}: skipping due to tracker filter'.format(t.name))
     continue
 
